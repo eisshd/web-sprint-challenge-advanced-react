@@ -28,7 +28,10 @@ export default class AppClass extends React.Component {
       message: initialMessage,
       email: initialEmail
     }
+
+
   }
+
   // THE FOLLOWING HELPERS ARE JUST RECOMMENDATIONS.
   // You can delete them and build your own logic from scratch.
 
@@ -46,29 +49,25 @@ export default class AppClass extends React.Component {
     return [x, y]
   }
 
-  getMessageError = () => {
+  getMessageError = (direction) => {
     // It it not necessary to have a state to track the "Coordinates (2, 2)" message for the user.
     // You can use the `getXY` helper above to obtain the coordinates, and then `getMessageError`
     // returns the fully constructed string.
-    const x = getCoordinates(this.state.index)[0]
-    const y = getCoordinates(this.state.index)[1]
+    const x = this.getCoordinates(this.state.index)[0]
+    const y = this.getCoordinates(this.state.index)[1]
 
-      if (x === 1){
-      setMessage(`You can't go left`)
-      console.log('left')
-      return message
-    } else if (x === 3){
-      setMessage(`You can't go right`)
-      console.log('right')
-      return message
-    } else if (y === 1){
-      setMessage(`You can't go up`)
-      console.log('up')
-      return message
-    } else if (y === 3){
-      setMessage(`You can't go down`)
-      console.log('down')
-      return message
+      if (x === 1 && direction === 'left'){
+      this.setState({message: `You can't go left`})
+      return this.message
+    } else if (x === 3 && direction === 'right'){
+      this.setState({message: `You can't go right`})
+      return this.message
+    } else if (y === 1 && direction === 'up'){
+      this.setState({message: `You can't go up`})
+      return this.message
+    } else if (y === 3 && direction === 'down'){
+      this.setState({message: `You can't go down`})
+      return this.message
     } else this.setState({message: initialMessage})
   }
 
@@ -86,22 +85,36 @@ export default class AppClass extends React.Component {
     // of the "B" would be. If the move is impossible because we are at the edge of the grid,
     // this helper should return the current index unchanged.
     if (direction === 'left' && (this.state.index != 0) && (this.state.index != 3) && (this.state.index != 6)){
-      return this.setState({index: this.state.index - 1})
+      return [this.setState({index: this.state.index - 1}), this.setState({message: initialMessage})]
     } else if (direction === 'down' && (this.state.index != 6) && (this.state.index != 7) && (this.state.index != 8)){
-      return this.setState({index:  this.state.index + 3})
+      return [this.setState({index:  this.state.index + 3}), this.setState({message: initialMessage})]
     } else if (direction === 'right' && (this.state.index != 2) && (this.state.index != 5) && (this.state.index != 8)){
-      return this.setState({index:  this.state.index + 1})
+      return [this.setState({index:  this.state.index + 1}), this.setState({message: initialMessage})]
     } else if (direction === 'up' && (this.state.index != 0) && (this.state.index != 1) && (this.state.index != 2)){
-      return this.setState({index:  this.state.index - 3})
-    } else return 0
+      return [this.setState({index:  this.state.index - 3}), this.setState({message: initialMessage})]
+    } else if (direction === 'left'){
+      return [this.getMessageError('left'), -1]
+    } else if (direction === 'down'){
+      return [this.getMessageError('down'), -1]
+    } else if (direction === 'right'){
+      return [this.getMessageError('right'), -1]
+    } else if (direction === 'up'){
+      return [this.getMessageError('up'), -1]
+    }
   }
 
   move = (evt) => {
     // This event handler can use the helper above to obtain a new index for the "B",
     // and change any states accordingly.
-    if (evt != 0){
+    if (evt[1] != -1){
       return this.setState({ steps: this.state.steps + 1})
-    } else this.getMessageError
+    }
+  }
+
+  stepsMessage = () => {
+    if(this.state.steps === 1){
+    return `You moved ${this.state.steps} time`
+    } else return `You moved ${this.state.steps} times` 
   }
 
   onChange = (evt) => {
@@ -124,7 +137,6 @@ export default class AppClass extends React.Component {
         //  .catch(err => console.log(err.response.data.message))
          .catch(err => {this.setState({message: err.response.data.message})})
          .finally(() => {this.setState({email: initialEmail})})
-
   }
 
   render() {
@@ -133,7 +145,7 @@ export default class AppClass extends React.Component {
       <div id="wrapper" className={className}>
         <div className="info">
           <h3 id="coordinates">Coordinates ({this.getCoordinates(this.state.index).toString()})</h3>
-          <h3 id="steps">You moved {this.state.steps} times</h3>
+          <h3 id="steps">{this.stepsMessage()}</h3>
         </div>
         <div id="grid">
           {

@@ -33,28 +33,24 @@ export default function AppFunctional(props) {
       return [x, y]
   }
 
-  function getMessageError() {
+  function getMessageError(direction) {
     // It it not necessary to have a state to track the "Coordinates (2, 2)" message for the user.
     // You can use the `getCoordinates` helper above to obtain the coordinates, and then `getMessageError`
     // returns the fully constructed string.
     const x = getCoordinates(index)[0]
     const y = getCoordinates(index)[1]
 
-      if (x === 1){
+      if (x === 1 && direction === 'left'){
       setMessage(`You can't go left`)
-      console.log('left')
       return message
-    } else if (x === 3){
+    } else if (x === 3 && direction === 'right'){
       setMessage(`You can't go right`)
-      console.log('right')
       return message
-    } else if (y === 1){
+    } else if (y === 1 && direction === 'up'){
       setMessage(`You can't go up`)
-      console.log('up')
       return message
-    } else if (y === 3){
+    } else if (y === 3 && direction === 'down'){
       setMessage(`You can't go down`)
-      console.log('down')
       return message
     } else setMessage(initialMessage)
   } 
@@ -72,24 +68,36 @@ export default function AppFunctional(props) {
     // of the "B" would be. If the move is impossible because we are at the edge of the grid,
     // this helper should return the current index unchanged.
     if (direction === 'left' && (index != 0) && (index != 3) && (index != 6)){
-      return setIndex(index - 1)
+      return [setIndex(index - 1), setMessage(initialMessage)]
     } else if (direction === 'down' && (index != 6) && (index != 7) && (index != 8)){
-      return setIndex(index + 3)
+      return [setIndex(index + 3), setMessage(initialMessage)]
     } else if (direction === 'right' && (index != 2) && (index != 5) && (index != 8)){
-      return setIndex(index + 1)
+      return [setIndex(index + 1), setMessage(initialMessage)]
     } else if (direction === 'up' && (index != 0) && (index != 1) && (index != 2)){
-      return setIndex(index - 3)
-    } else return -1
-
+      return [setIndex(index - 3), setMessage(initialMessage)]
+    } else if (direction === 'left'){
+      return [getMessageError('left'), -1]
+    }  else if (direction === 'down'){
+      return [getMessageError('down'), -1]
+    }  else if (direction === 'right'){
+      return [getMessageError('right'), -1]
+    }  else if (direction === 'up'){
+      return [getMessageError('up'), -1]
+    }
  }
 
   function move(evt) {
     // This event handler can use the helper above to obtain a new index for the "B", and change any states accordingly.
     // counts the times you moved
-      if (evt != -1){
+      if (evt[1] != -1){
         return setSteps( steps + 1 )
-      } else getMessageError()
+      }
+  }
 
+  function stepsMessage() {
+    if(steps === 1){
+    return `You moved ${steps} time`
+    } else return `You moved ${steps} times` 
   }
 
   function onChange(evt) {
@@ -118,7 +126,7 @@ export default function AppFunctional(props) {
     <div id="wrapper" className={props.className}>
       <div className="info">
         <h3 id="coordinates">Coordinates ({getCoordinates(index).toString()})</h3>
-        <h3 id="steps">You moved {steps} times</h3>
+        <h3 id="steps">{stepsMessage()}</h3>
       </div>
       <div id="grid">
         {
